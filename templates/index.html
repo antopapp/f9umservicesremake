@@ -1554,7 +1554,7 @@
             document.getElementById('resultsArea').innerHTML = '';
         }
 
-        // Requêtes API en local (Multicritère)
+       // Requêtes API (Multicritère) - Corrigé pour utiliser l'URL de l'hébergeur
         async function lancerRechercheMulticritere() {
             const area = document.getElementById('resultsArea');
             const payloadData = {
@@ -1600,19 +1600,22 @@
                 <div class="spinner-container">
                     <div class="spinner"></div>
                     <p style="font-size: 0.9rem; color: var(--text-muted); font-family: var(--font-mono);">
-                        Interrogation de l'API locale en cours...
+                        Interrogation de l'API en cours...
                     </p>
                 </div>
             `;
 
             try {
-                const LOCAL_API_URL = "f9umservicesremake-production-7f40.up.railway.app"; 
+                // Utilise dynamiquement l'URL de l'hébergeur (domaine actuel + port éventuel)
+                // Si ton front-end et ton back-end sont servis par le même serveur (ex: Flask / Node.js)
+                const API_BASE_URL = window.location.origin; 
+                
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 45000);
 
                 const queryParams = new URLSearchParams(Object.entries(payloadData).filter(([_, v]) => v !== "" && v !== false));
 
-                const response = await fetch(`${LOCAL_API_URL}/search?${queryParams.toString()}`, {
+                const response = await fetch(`${API_BASE_URL}/search?${queryParams.toString()}`, {
                     method: 'GET',
                     signal: controller.signal,
                     headers: { 'Accept': 'application/json' }
@@ -1620,7 +1623,7 @@
                 
                 clearTimeout(timeoutId);
 
-                if (!response.ok) throw new Error(`Erreur serveur local : ${response.status}`);
+                if (!response.ok) throw new Error(`Erreur serveur : ${response.status}`);
 
                 const data = await response.json();
 
@@ -1637,10 +1640,10 @@
                     });
                     area.innerHTML = htmlResults;
                 } else {
-                    area.innerHTML = `<div class="result-card"><p style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-muted);">Aucun enregistrement correspondant trouvé pour ces critères dans l'index local.</p></div>`;
+                    area.innerHTML = `<div class="result-card"><p style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-muted);">Aucun enregistrement correspondant trouvé pour ces critères dans l'index.</p></div>`;
                 }
             } catch (error) {
-                area.innerHTML = `<div class="result-card" style="border-left-color: var(--danger);"><p style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--danger);">Erreur de connexion à l'API locale : ${error.message} (Vérifie que ton serveur Python tourne bien sur le port 5000)</p></div>`;
+                area.innerHTML = `<div class="result-card" style="border-left-color: var(--danger);"><p style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--danger);">Erreur de connexion à l'API : ${error.message}</p></div>`;
             }
         }
     </script>
