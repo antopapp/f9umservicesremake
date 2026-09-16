@@ -188,32 +188,6 @@
             flex-wrap: wrap;
         }
 
-        .nav-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 9px 18px;
-            border-radius: 50px;
-            font-family: var(--font-mono);
-            font-size: 12px;
-            font-weight: 600;
-            backdrop-filter: blur(12px);
-        }
-
-        .wallet-badge {
-            background: rgba(139, 92, 246, 0.1);
-            border: 1px solid rgba(139, 92, 246, 0.35);
-            color: #c084fc;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .wallet-badge:hover {
-            background: rgba(139, 92, 246, 0.22);
-            box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
-            transform: translateY(-1px);
-        }
-
         .pulse-dot {
             width: 8px;
             height: 8px;
@@ -600,7 +574,7 @@
             flex-wrap: wrap;
         }
 
-        button.btn-action {
+        a.btn-action, button.btn-action {
             font-family: var(--font-sans);
             font-size: 14px;
             font-weight: 600;
@@ -610,6 +584,7 @@
             border: none;
             background: linear-gradient(135deg, var(--primary), #cc0033);
             color: #ffffff;
+            text-decoration: none;
             box-shadow: 0 10px 25px var(--primary-glow);
             transition: var(--transition);
             display: inline-flex;
@@ -617,7 +592,7 @@
             gap: 9px;
         }
 
-        button.btn-action:hover {
+        a.btn-action:hover, button.btn-action:hover {
             transform: translateY(-2px);
             box-shadow: 0 16px 38px rgba(255, 7, 58, 0.6);
         }
@@ -843,54 +818,6 @@
             border-radius: 12px;
             font-size: 12px;
         }
-
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(1, 3, 8, 0.82);
-            backdrop-filter: blur(12px);
-            z-index: 100;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .modal-card {
-            background: var(--bg-surface);
-            border: 1px solid var(--border-color);
-            border-radius: 22px;
-            padding: 32px;
-            width: 100%;
-            max-width: 460px;
-            box-shadow: 0 35px 70px rgba(0,0,0,0.85);
-            animation: fadeIn 0.3s ease;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .modal-title {
-            font-size: 19px;
-            font-weight: 700;
-        }
-
-        .close-modal {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 22px;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .close-modal:hover {
-            color: #ffffff;
-        }
     </style>
 </head>
 <body>
@@ -911,18 +838,15 @@
                 <div class="brand-name">F9UM<span> SERVICES</span></div>
             </a>
             
-            <div class="im-back-tag">I'M BACK</div>
-
             <div class="nav-actions">
-                <div class="nav-badge wallet-badge" onclick="openWalletModal()">
-                    💳 <span id="walletBalance">0,00</span> €
-                </div>
+                <a href="#searchSection" class="btn-action" style="padding: 9px 18px; font-size: 13px;">Lancer une recherche</a>
             </div>
         </header>
 
         <!-- Hero Section -->
         <section class="hero-section">
             <div class="hero-content">
+                <div class="im-back-tag" style="margin-bottom: 12px;">I'M BACK</div>
                 <div class="hero-socials">
                     <a href="https://instagram.com/kyzn9_" target="_blank" rel="noopener noreferrer" class="hero-social-badge">
                         <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"></path></svg>
@@ -1140,7 +1064,7 @@
             <div id="module-shop" class="module-panel">
                 <div class="section-header" style="margin-bottom: 25px;">
                     <h2 style="font-size: 24px;">Boutique Officielle SHOP F9UM</h2>
-                    <p>Commandez vos abonnements, clés API et services exclusifs directement avec votre portefeuille.</p>
+                    <p>Commandez vos abonnements, clés API et services exclusifs.</p>
                 </div>
                 <div class="fields-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 30px;">
                     <!-- Produit 1 -->
@@ -1219,24 +1143,6 @@
             <div class="tor-notice">⏳ Bientôt sur Tor (.onion)</div>
         </footer>
 
-    </div>
-
-    <!-- Modal Crédit Wallet -->
-    <div class="modal-overlay" id="walletModal">
-        <div class="modal-card">
-            <div class="modal-header">
-                <div class="modal-title">Créditer le Portefeuille</div>
-                <button class="close-modal" onclick="closeWalletModal()">×</button>
-            </div>
-            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">Simulez un rechargement de crédits pour tester les achats sur le SHOP F9UM et les appels d'API à haute performance de la plateforme.</p>
-            <div class="fields-grid" style="grid-template-columns: 1fr; margin-bottom: 20px;">
-                <div class="field-group">
-                    <label for="rechargeAmount">Montant à ajouter (€)</label>
-                    <input type="text" id="rechargeAmount" value="25.00">
-                </div>
-            </div>
-            <button class="btn-action" style="width: 100%; justify-content: center;" onclick="crediterWallet()">Valider le rechargement</button>
-        </div>
     </div>
 
     <!-- Script JavaScript -->
@@ -1363,44 +1269,15 @@
             indicator.textContent = element.classList.contains('open') ? '-' : '+';
         }
 
-        // Wallet & Shop Purchase
-        let userBalance = 0.00;
-        function openWalletModal() {
-            document.getElementById('walletModal').style.display = 'flex';
-        }
-        function closeWalletModal() {
-            document.getElementById('walletModal').style.display = 'none';
-        }
-        function crediterWallet() {
-            const amount = parseFloat(document.getElementById('rechargeAmount').value);
-            if (!isNaN(amount) && amount > 0) {
-                userBalance += amount;
-                document.getElementById('walletBalance').innerText = userBalance.toFixed(2).replace('.', ',');
-                closeWalletModal();
-            }
-        }
-
         function acheterProduit(nomProduit, prix) {
             const area = document.getElementById('resultsArea');
-            if (userBalance < prix) {
-                area.innerHTML = `
-                    <div class="result-card" style="border-left-color: var(--danger);">
-                        <p style="color: var(--danger); font-family: var(--font-mono); font-size: 0.9rem;">⚠️ Solde insuffisant pour commander "${nomProduit}" (${prix.toFixed(2).replace('.', ',')} € requis). Veuillez créditer votre portefeuille.</p>
-                    </div>`;
-                openWalletModal();
-                return;
-            }
-
-            userBalance -= prix;
-            document.getElementById('walletBalance').innerText = userBalance.toFixed(2).replace('.', ',');
-
             area.innerHTML = `
                 <div class="result-card" style="border-left-color: var(--success);">
-                    <div style="font-family: var(--font-mono); font-size: 0.85rem; white-space: pre-line; margin-bottom: 15px; color: #e2e8f0;">[SHOP F9UM - COMMANDE VALIDÉE]
+                    <div style="font-family: var(--font-mono); font-size: 0.85rem; white-space: pre-line; margin-bottom: 15px; color: #e2e8f0;">[SHOP F9UM - COMMANDE INITIALISÉE]
                     Article : ${nomProduit}
-                    Montant débité : ${prix.toFixed(2).replace('.', ',')} €
-                    Statut : Traitement effectué avec succès. Votre licence/accès a été généré et lié à votre compte.</div>
-                    <p style="color: var(--success); font-family: var(--font-mono); font-size: 0.85rem;">✅ Achat réalisé avec succès !</p>
+                    Montant : ${prix.toFixed(2).replace('.', ',')} €
+                    Statut : Veuillez contacter l'administration pour finaliser votre commande.</div>
+                    <p style="color: var(--success); font-family: var(--font-mono); font-size: 0.85rem;">✅ Commande prête à être traitée.</p>
                 </div>
             `;
         }
@@ -1606,8 +1483,6 @@
             `;
 
             try {
-                // Utilise dynamiquement l'URL de l'hébergeur (domaine actuel + port éventuel)
-                // Si ton front-end et ton back-end sont servis par le même serveur (ex: Flask / Node.js)
                 const API_BASE_URL = window.location.origin; 
                 
                 const controller = new AbortController();
