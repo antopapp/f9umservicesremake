@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: f9umservicesremake-production-7f40.up.railway.app
