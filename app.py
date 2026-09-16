@@ -16,7 +16,7 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 BRIX_API_KEY = os.environ.get("BRIX_API_KEY", "brix_votre_cle_api")
 VT_API_KEY = os.environ.get("VT_API_KEY", "votre_cle_virustotal")
 DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", "TON_WEBHOOK_DISCORD_ICI")
-IPINFO_TOKEN = os.environ.get("IPINFO_TOKEN", "")
+IPIFY_API_KEY = os.environ.get("IPIFY_API_KEY", "")
 
 BASE_URL = "https://api.brixhub.to/api/v1"
 VT_URL = "https://www.virustotal.com/api/v3/files/"
@@ -29,51 +29,52 @@ def get_country_flag(country_code):
         return "🏳️"
     return chr(127397 + ord(country_code[0].upper())) + chr(127397 + ord(country_code[1].upper()))
 
-def get_ip_info(ip):
+def get_ipinfo_from_ipify(ip):
+    """
+    Interroge l'API ipify Geolocation (sans ipAddress si IP locale/inconnue,
+    ou avec &ipAddress=... si l'IP est transmise).
+    """
+    if not IPIFY_API_KEY:
+        return {"city": "Clé ipify manquante", "country": "XX"}
+
     try:
-        if ip in ["127.0.0.1", "::1", "localhost", "10.0.2.15"]:
-            return {"city": "Localhost", "country": "FR"}
+        # Si IP locale ou indéfinie, on laisse ipify détecter l'IP publique de la requête
+        if ip in ["127.0.0.1", "::1", "localhost", "10.0.2.15"] or not ip:
+            url = f"https://geo.ipify.org/api/v2/country,city?apiKey={IPIFY_API_KEY}"
+        else:
+            url = f"https://geo.ipify.org/api/v2/country,city?apiKey={IPIFY_API_KEY}&ipAddress={ip}"
 
-        headers = {"User-Agent": "Mozilla/5.0"}
-        token_suffix = f"?token={IPINFO_TOKEN}" if IPINFO_TOKEN else ""
-
-        # 1. Premier appel avec l'IP reçue (IPv4)
-        url = f"https://ipinfo.io/{ip}/json{token_suffix}"
-        response = requests.get(url, headers=headers, timeout=3)
-
+        response = requests.get(url, timeout=3)
         if response.status_code == 200:
             data = response.json()
-
-            # 2. Si l'API renvoie un champ 'ipv6', on interroge IPinfo avec CETTE IPv6
-            ipv6_addr = data.get("ipv6")
-            if ipv6_addr:
-                url_v6 = f"https://ipinfo.io/{ipv6_addr}/json{token_suffix}"
-                res_v6 = requests.get(url_v6, headers=headers, timeout=3)
-                if res_v6.status_code == 200:
-                    data_v6 = res_v6.json()
-                    # On conserve la véritable IPv6 dans les données de retour
-                    data_v6["real_ip"] = ipv6_addr
-                    return data_v6
-
-            data["real_ip"] = ip
-            return data
+            loc = data.get("location", {})
+            return {
+                "ip": data.get("ip", ip),
+                "city": loc.get("city", "Inconnue"),
+                "country": loc.get("country", "XX")
+            }
     except Exception as e:
-        print("Erreur IPinfo:", str(e))
+        print("Erreur ipify:", str(e))
 
-    return {"city": "Inconnue", "country": "XX", "real_ip": ip}
+    return {"ip": ip, "city": "Inconnue", "country": "XX"}
 
-def send_discord_log(user_ip, query, result_count, user_agent):
+def send_discord_log(user_ip, query, result_count, user_agent, client_city=None, client_country=None):
     if not DISCORD_WEBHOOK_URL or DISCORD_WEBHOOK_URL == "TON_WEBHOOK_DISCORD_ICI":
         return
 
     try:
-        geo = get_ip_info(user_ip)
-        city = geo.get("city", "Inconnue")
-        country_code = geo.get("country", "XX")
-        flag = get_country_flag(country_code)
+        # Si la ville/pays sont déjà transmis par le client JS, on les utilise. Sinon, appel backend à ipify.
+        if client_city and client_country:
+            city = client_city
+            country_code = client_country
+            display_ip = user_ip
+        else:
+            geo_info = get_ipinfo_from_ipify(user_ip)
+            city = geo_info.get("city", "Inconnue")
+            country_code = geo_info.get("country", "XX")
+            display_ip = geo_info.get("ip", user_ip)
 
-        # Utilise l'IPv6 si get_ip_info l'a récupérée, sinon l'IP de base
-        display_ip = geo.get("real_ip", user_ip)
+        flag = get_country_flag(country_code)
 
         payload = {
             "embeds": [
@@ -120,21 +121,30 @@ def index():
 
 @app.route('/search', methods=['GET'])
 def search():
-    # Récupère l'IP réelle de l'utilisateur
-    user_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
-    if user_ip:
-        user_ip = user_ip.split(',')[0].strip()
-        if user_ip.startswith('::ffff:'):
-            user_ip = user_ip.replace('::ffff:', '')
+    # 1. On vérifie si une IP ou une localisation a été transmise directement depuis le client frontend
+    override_ip = request.args.get('client_ip')
+    client_city = request.args.get('city')
+    client_country = request.args.get('country')
+
+    if override_ip and override_ip.strip():
+        user_ip = override_ip.strip()
+    else:
+        # Récupère l'IP détectée par le serveur
+        user_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+        if user_ip:
+            user_ip = user_ip.split(',')[0].strip()
+            if user_ip.startswith('::ffff:'):
+                user_ip = user_ip.replace('::ffff:', '')
         
     user_agent = request.headers.get('User-Agent', 'Inconnu')
 
     # Récupère tous les paramètres de l'URL envoyés par le JS
     req_data = request.args.to_dict()
 
-    # Nettoyage : on supprime tous les champs vides ou "tous"
+    # Nettoyage : on supprime tous les champs vides, "tous" ou nos paramètres internes d'IP
     cleaned_data = {
-        k: v for k, v in req_data.items() if v not in ['', None, 'tous']
+        k: v for k, v in req_data.items() 
+        if v not in ['', None, 'tous', 'client_ip', 'city', 'country']
     }
 
     # Conversion du paramètre flexible en booléen si présent
@@ -218,9 +228,9 @@ def search():
 
             formatted_results.append({"data": formatted_text})
 
-        # Envoi direct du log sur Discord avec le nombre de résultats trouvés
+        # Envoi direct du log sur Discord avec les informations de géolocalisation ipify
         result_count = len(formatted_results)
-        send_discord_log(user_ip, search_query_display, result_count, user_agent)
+        send_discord_log(user_ip, search_query_display, result_count, user_agent, client_city, client_country)
 
         final_response = {
             "status": "success",
