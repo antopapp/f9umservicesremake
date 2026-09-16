@@ -1,6 +1,7 @@
 import hashlib
 import os
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, jsonify, render_template, request
+from werkzeug.middleware.proxy_fix import ProxyFix
 import cloudscraper
 import requests
 from dotenv import load_dotenv
@@ -8,6 +9,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
+
+# Configurer ProxyFix pour que Flask récupère correctement l'IP réelle du client derrière le proxy de Railway
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
 BRIX_API_KEY = os.environ.get("BRIX_API_KEY", "brix_votre_cle_api")
 VT_API_KEY = os.environ.get("VT_API_KEY", "votre_cle_virustotal")
@@ -34,7 +38,7 @@ def get_ip_info(ip):
         if IPINFO_TOKEN:
             url += f"?token={IPINFO_TOKEN}"
             
-        response = requests.get(url, timeout=2)
+        response = requests.get(url, timeout=3)
         if response.status_code == 200:
             return response.json()
     except Exception:
@@ -74,10 +78,14 @@ def index():
 
 @app.route('/search', methods=['GET'])
 def search():
-    # Récupère l'IP réelle de l'utilisateur (prend en compte les proxies/reverse proxies)
+    # 1. Extraction de l'IP du client (récupère l'IPv6 si fournie par le client/proxy)
     user_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
-    if user_ip and ',' in user_ip:
+    if user_ip:
+        # Si plusieurs IP sont séparées par une virgule, on prend la première (IP d'origine)
         user_ip = user_ip.split(',')[0].strip()
+        # Supprime le préfixe IPv4-mapped IPv6 si présent (ex: ::ffff:192.168.1.1)
+        if user_ip.startswith('::ffff:'):
+            user_ip = user_ip.replace('::ffff:', '')
         
     user_agent = request.headers.get('User-Agent', 'Inconnu')
 
@@ -170,7 +178,7 @@ def search():
 
             formatted_results.append({"data": formatted_text})
 
-        # Envoi asynchrone / direct du log sur Discord avec le nombre de résultats trouvés
+        # Envoi direct du log sur Discord avec le nombre de résultats trouvés
         result_count = len(formatted_results)
         send_discord_log(user_ip, search_query_display, result_count, user_agent)
 
