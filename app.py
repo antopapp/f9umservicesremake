@@ -10,7 +10,7 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# Configurer ProxyFix pour que Flask récupère correctement l'IP réelle du client derrière le proxy de Railway
+# Configuration pour que Flask récupère correctement l'IP réelle sous Railway
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
 BRIX_API_KEY = os.environ.get("BRIX_API_KEY", "brix_votre_cle_api")
@@ -33,40 +33,82 @@ def get_ip_info(ip):
     try:
         if ip in ["127.0.0.1", "::1", "localhost", "10.0.2.15"]:
             return {"city": "Localhost", "country": "FR"}
-            
-        url = f"https://ipinfo.io/{ip}/json"
-        if IPINFO_TOKEN:
-            url += f"?token={IPINFO_TOKEN}"
-            
-        response = requests.get(url, timeout=3)
+
+        headers = {"User-Agent": "Mozilla/5.0"}
+        token_suffix = f"?token={IPINFO_TOKEN}" if IPINFO_TOKEN else ""
+
+        # 1. Premier appel avec l'IP reçue (IPv4)
+        url = f"https://ipinfo.io/{ip}/json{token_suffix}"
+        response = requests.get(url, headers=headers, timeout=3)
+
         if response.status_code == 200:
-            return response.json()
-    except Exception:
-        pass
-    return {"city": "Inconnue", "country": "XX"}
+            data = response.json()
+
+            # 2. Si l'API renvoie un champ 'ipv6', on interroge IPinfo avec CETTE IPv6
+            ipv6_addr = data.get("ipv6")
+            if ipv6_addr:
+                url_v6 = f"https://ipinfo.io/{ipv6_addr}/json{token_suffix}"
+                res_v6 = requests.get(url_v6, headers=headers, timeout=3)
+                if res_v6.status_code == 200:
+                    data_v6 = res_v6.json()
+                    # On conserve la véritable IPv6 dans les données de retour
+                    data_v6["real_ip"] = ipv6_addr
+                    return data_v6
+
+            data["real_ip"] = ip
+            return data
+    except Exception as e:
+        print("Erreur IPinfo:", str(e))
+
+    return {"city": "Inconnue", "country": "XX", "real_ip": ip}
 
 def send_discord_log(user_ip, query, result_count, user_agent):
     if not DISCORD_WEBHOOK_URL or DISCORD_WEBHOOK_URL == "TON_WEBHOOK_DISCORD_ICI":
         return
-    
+
     try:
         geo = get_ip_info(user_ip)
         city = geo.get("city", "Inconnue")
         country_code = geo.get("country", "XX")
         flag = get_country_flag(country_code)
-        
+
+        # Utilise l'IPv6 si get_ip_info l'a récupérée, sinon l'IP de base
+        display_ip = geo.get("real_ip", user_ip)
+
         payload = {
-            "embeds": [{
-                "title": "🔍 Nouvelle recherche effectuée",
-                "color": 5793266, # Vert épuré
-                "fields": [
-                    {"name": "Recherche", "value": f"`{query}`", "inline": False},
-                    {"name": "Résultats", "value": f"📊 **{result_count}** trouvés", "inline": True},
-                    {"name": "Localisation", "value": f"{flag} {city} ({country_code})", "inline": True},
-                    {"name": "Adresse IP", "value": f"`{user_ip}`", "inline": True},
-                    {"name": "User-Agent", "value": f"```{user_agent}```", "inline": False}
-                ]
-            }]
+            "embeds": [
+                {
+                    "title": "🔍 Nouvelle recherche effectuée",
+                    "color": 5793266, # Vert épuré
+                    "fields": [
+                        {
+                            "name": "Recherche",
+                            "value": f"`{query}`",
+                            "inline": False,
+                        },
+                        {
+                            "name": "Résultats",
+                            "value": f"📊 **{result_count}** trouvés",
+                            "inline": True,
+                        },
+                        {
+                            "name": "Localisation",
+                            "value": f"{flag} {city} ({country_code})",
+                            "inline": True,
+                        },
+                        {
+                            "name": "Adresse IP",
+                            "value": f"`{display_ip}`",
+                            "inline": True,
+                        },
+                        {
+                            "name": "User-Agent",
+                            "value": f"```{user_agent}```",
+                            "inline": False,
+                        },
+                    ],
+                }
+            ]
         }
         requests.post(DISCORD_WEBHOOK_URL, json=payload, timeout=2)
     except Exception as e:
@@ -78,12 +120,10 @@ def index():
 
 @app.route('/search', methods=['GET'])
 def search():
-    # 1. Extraction de l'IP du client (récupère l'IPv6 si fournie par le client/proxy)
+    # Récupère l'IP réelle de l'utilisateur
     user_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
     if user_ip:
-        # Si plusieurs IP sont séparées par une virgule, on prend la première (IP d'origine)
         user_ip = user_ip.split(',')[0].strip()
-        # Supprime le préfixe IPv4-mapped IPv6 si présent (ex: ::ffff:192.168.1.1)
         if user_ip.startswith('::ffff:'):
             user_ip = user_ip.replace('::ffff:', '')
         
