@@ -839,7 +839,7 @@
             </a>
             
             <div class="nav-actions">
-                <a href="#searchSection" class="btn-action" style="padding: 9px 18px; font-size: 13px;">Lancer une recherche</a>
+                <a href="#searchSection" class="btn-action" style="padding: 9px 18px; font-size: 13px;">Lancer</a>
             </div>
         </header>
 
@@ -890,8 +890,8 @@
         <!-- MODULES DE RECHERCHE & BOUTIQUE -->
         <section id="searchSection" class="search-section">
             <div class="section-header">
-                <h2>Modules d'Investigation &amp; Services</h2>
-                <p>Sélectionnez un module ci-dessous pour lancer vos recherches.</p>
+                <h2>Investigation &amp; Services</h2>
+                <p>Sélectionnez un champs pour lancer vos recherches.</p>
             </div>
 
             <div class="modules-nav">
@@ -906,7 +906,7 @@
                     
                     <div class="accordion-item active">
                         <button class="accordion-header" onclick="toggleAccordion(this)">
-                            <span class="accordion-title-left">👤 IDENTITÉE &amp; PROFILS</span>
+                            <span class="accordion-title-left">👤 PROFILS</span>
                             <span class="accordion-arrow">▼</span>
                         </button>
                         <div class="accordion-content" style="max-height: 420px;">
@@ -1043,14 +1043,14 @@
             <!-- MODULE 2 : Scan de Fichiers VirusTotal -->
             <div id="module-scanner" class="module-panel">
                 <div class="section-header" style="margin-bottom: 25px;">
-                    <h2>Analyseur de Fichiers (VirusTotal)</h2>
-                    <p>Sélectionnez un fichier pour l'analyser via son empreinte SHA-256 de manière sécurisée.</p>
+                    <h2>Analyse de Fichiers</h2>
+                    <p>Basé sur son empreinte SHA-256.</p>
                 </div>
                 
                 <div class="search-builder">
                     <div class="result-card">
                         <div class="field-group">
-                            <label for="inputFile">Sélectionner un fichier cible</label>
+                            <label for="inputFile">Sélectionnez un fichier</label>
                             <input type="file" id="inputFile" onchange="calculerHashEtScanner()">
                         </div>
                     </div>
@@ -1063,19 +1063,19 @@
             <!-- MODULE 3 : SHOP F9UM -->
             <div id="module-shop" class="module-panel">
                 <div class="section-header" style="margin-bottom: 25px;">
-                    <h2 style="font-size: 24px;">Boutique Officielle SHOP F9UM</h2>
-                    <p>Commandez vos abonnements, clés API et services exclusifs.</p>
+                    <h2 style="font-size: 24px;">SOUVENT MIS A JOUR</h2>
+                    <p>Commandez vos abonnements, clés APIs et services exclusifs.</p>
                 </div>
                 <div class="fields-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 30px;">
                     <!-- Produit 1 -->
                     <div class="result-card" style="margin-bottom: 0; display: flex; flex-direction: column; justify-content: space-between;">
                         <div>
                             <div style="font-family: var(--font-mono); font-size: 12px; color: var(--primary); margin-bottom: 8px;">[ACCÈS VIP]</div>
-                            <h3 style="font-size: 18px; margin-bottom: 10px; color: #ffffff;">Pass OSINT Illimité (1 Mois)</h3>
-                            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Requêtes illimitées, latence prioritaire garantie et accès complet aux bases de données sans restriction.</p>
+                            <h3 style="font-size: 18px; margin-bottom: 10px; color: #ffffff;">PREMIUM OSINT(2 Mois)</h3>
+                            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Requêtes illimitées, accès complet aux bases de données sans restriction + API personnelle.</p>
                         </div>
                         <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 15px;">
-                            <span style="font-family: var(--font-mono); font-size: 18px; font-weight: 700; color: #ffffff;">29,99 €</span>
+                            <span style="font-family: var(--font-mono); font-size: 18px; font-weight: 700; color: #ffffff;">49,99 €</span>
                             <button class="btn-action" style="padding: 10px 18px; font-size: 13px;" onclick="acheterProduit('Pass OSINT Illimité (1 Mois)', 29.99)">Commander</button>
                         </div>
                     </div>
@@ -1083,8 +1083,8 @@
                     <div class="result-card" style="margin-bottom: 0; display: flex; flex-direction: column; justify-content: space-between;">
                         <div>
                             <div style="font-family: var(--font-mono); font-size: 12px; color: var(--primary); margin-bottom: 8px;">[API DÉVELOPPEUR]</div>
-                            <h3 style="font-size: 18px; margin-bottom: 10px; color: #ffffff;">Clé API F9UM v5</h3>
-                            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Intégrez le moteur d'investigation directement dans vos applications tierces (10 000 requêtes incluses).</p>
+                            <h3 style="font-size: 18px; margin-bottom: 10px; color: #ffffff;">Clé API F9UM</h3>
+                            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Intégrez 10 APIs developpées par mes soins directement dans vos applications tierces (100 000 requêtes incluses/J).</p>
                         </div>
                         <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 15px;">
                             <span style="font-family: var(--font-mono); font-size: 18px; font-weight: 700; color: #ffffff;">49,99 €</span>
@@ -1096,7 +1096,7 @@
                         <div>
                             <div style="font-family: var(--font-mono); font-size: 12px; color: var(--primary); margin-bottom: 8px;">[RAPPORT EXPERT]</div>
                             <h3 style="font-size: 18px; margin-bottom: 10px; color: #ffffff;">Audit de Sécurité &amp; OSINT</h3>
-                            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Rapport d'investigation complet et détaillé réalisé manuellement par notre équipe d'analystes.</p>
+                            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Rapport complet et détaillé de votre infrastructure réseau et de sécurité afin de durcir et aligner votre architecture (routage, pare-feu, segmentation) sur les exigences du RGPD et les normes en vigueur..</p>
                         </div>
                         <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 15px;">
                             <span style="font-family: var(--font-mono); font-size: 18px; font-weight: 700; color: #ffffff;">99,00 €</span>
