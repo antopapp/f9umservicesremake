@@ -858,7 +858,7 @@
                     </a>
                 </div>
                 <h1>Intelligence &amp; OSINT Global Scale.</h1>
-                <p>Plateforme de croisement de données ultra-rapide dédiée aux analystes et équipes d'investigation. Interrogez plus de 11 milliards d'enregistrements indexés en moins de 100 ms pour <span class="typed-text" id="typewriter">la cybersécurité.</span></p>
+                <p>Plateforme de données dédiée aux analystes et équipes d'investigation. Interrogez plus de 20 API et 11 milliards d'enregistrements indexés en moins de 50ms pour <span class="typed-text" id="typewriter">la cybersécurité.</span></p>
             </div>
 
             <!-- Widget Télémétrie -->
@@ -891,12 +891,12 @@
         <section id="searchSection" class="search-section">
             <div class="section-header">
                 <h2>Modules d'Investigation &amp; Services</h2>
-                <p>Sélectionnez un module ci-dessous pour lancer vos requêtes ou accéder au catalogue.</p>
+                <p>Sélectionnez un module ci-dessous pour lancer vos recherches.</p>
             </div>
 
             <div class="modules-nav">
-                <button class="tab-btn active" onclick="switchModule('multicritere', this)">🔍 Multicritère OSINT</button>
-                <button class="tab-btn" onclick="switchModule('scanner', this)">🛡️ Scan Fichiers</button>
+                <button class="tab-btn active" onclick="switchModule('multicritere', this)">🔍 MULTI-OSINT</button>
+                <button class="tab-btn" onclick="switchModule('scanner', this)">🛡️ SCAN FICHIERS</button>
                 <button class="tab-btn" onclick="switchModule('shop', this)">🛒 SHOP F9UM</button>
             </div>
 
@@ -906,7 +906,7 @@
                     
                     <div class="accordion-item active">
                         <button class="accordion-header" onclick="toggleAccordion(this)">
-                            <span class="accordion-title-left">👤 Identité &amp; Profils</span>
+                            <span class="accordion-title-left">👤 IDENTITÉE &amp; PROFILS</span>
                             <span class="accordion-arrow">▼</span>
                         </button>
                         <div class="accordion-content" style="max-height: 420px;">
@@ -941,7 +941,7 @@
 
                     <div class="accordion-item">
                         <button class="accordion-header" onclick="toggleAccordion(this)">
-                            <span class="accordion-title-left">📅 Naissance &amp; Origine</span>
+                            <span class="accordion-title-left">📅 NAISSANCE</span>
                             <span class="accordion-arrow">▼</span>
                         </button>
                         <div class="accordion-content">
@@ -972,7 +972,7 @@
 
                     <div class="accordion-item">
                         <button class="accordion-header" onclick="toggleAccordion(this)">
-                            <span class="accordion-title-left">✉️ Contact &amp; Connexions Réseau</span>
+                            <span class="accordion-title-left">✉️ CONTACT</span>
                             <span class="accordion-arrow">▼</span>
                         </button>
                         <div class="accordion-content">
@@ -999,7 +999,7 @@
 
                     <div class="accordion-item">
                         <button class="accordion-header" onclick="toggleAccordion(this)">
-                            <span class="accordion-title-left">📍 Localisation Géographique</span>
+                            <span class="accordion-title-left">📍 LOCALISATION</span>
                             <span class="accordion-arrow">▼</span>
                         </button>
                         <div class="accordion-content">
@@ -1025,7 +1025,7 @@
                 <!-- Menu Déroulant de l'Historique de Recherche -->
                 <div class="history-dropdown-container" id="historyDropdownContainer">
                     <button class="history-dropdown-btn" onclick="toggleHistoryDropdown(event)">
-                        <span>🕒 Historique des recherches récentes</span>
+                        <span>🕒 Historique des recherches</span>
                         <span id="historyDropdownArrow">▼</span>
                     </button>
                     <div class="history-dropdown-menu" id="historyDropdownMenu"></div>
@@ -1036,7 +1036,7 @@
                         <button class="btn-action" onclick="lancerRechercheMulticritere()">🔍 Lancer la recherche globale</button>
                         <button class="btn-action" style="background: rgba(255,255,255,0.05); border: 1px solid var(--border-color);" onclick="viderChamps()">Réinitialiser</button>
                     </div>
-                    <span style="font-size: 12px; color: var(--text-muted); font-family: var(--font-mono);">Moteur multicritère sécurisé v4.2</span>
+                    <span style="font-size: 12px; color: var(--text-muted); font-family: var(--font-mono);">Moteur de recherches securisé via une dizaine d'API</span>
                 </div>
             </div>
 
