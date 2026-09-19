@@ -1,6 +1,6 @@
 import os
 import requests
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, send_from_directory
 from werkzeug.middleware.proxy_fix import ProxyFix
 import cloudscraper
 from dotenv import load_dotenv
@@ -90,6 +90,20 @@ def send_discord_log(user_ip, query_details, result_count, city=None, country=No
     except Exception as e:
         print("Erreur d'envoi au webhook Discord:", str(e))
 
+# ==========================================
+# Option A : Service des fichiers SEO statiques
+# ==========================================
+@app.route('/robots.txt')
+def robots():
+    return send_from_directory(app.static_folder, 'robots.txt')
+
+@app.route('/sitemap.xml')
+def sitemap():
+    return send_from_directory(app.static_folder, 'sitemap.xml')
+
+# ==========================================
+# Routes de l'application
+# ==========================================
 @app.route('/')
 def index():
     return render_template('index.html')
