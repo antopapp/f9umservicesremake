@@ -12,11 +12,12 @@ app = Flask(__name__)
 # Configuration pour Railway / Proxies
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
-BRIX_API_KEY = os.environ.get("BRIX_API_KEY", "brix_votre_cle_api")
+# BRIX_API_KEY n'est plus nécessaire car l'API temporaire est sans compte
 VT_API_KEY = os.environ.get("VT_API_KEY", "votre_cle_virustotal")
 DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", "TON_WEBHOOK_DISCORD_ICI")
 
-BASE_URL = "https://api.brixhub.to/api/v1"
+# Mise à jour avec la nouvelle URL de l'API temporaire Brixhub (.ru)
+BASE_URL = "https://api.brixhub.ru/api/v1"
 VT_URL = "https://www.virustotal.com/api/v3/files/"
 
 scraper = cloudscraper.create_scraper()
@@ -48,7 +49,6 @@ def send_discord_log(user_ip, query_details, result_count, city=None, country=No
         return
 
     try:
-        # Résolution de la ville si elle est manquante
         if not city or city == "Inconnue":
             geo = get_geo_from_ip(user_ip)
             city = geo.get("city", "Inconnue")
@@ -110,7 +110,6 @@ def index():
 
 @app.route('/search', methods=['GET'])
 def search():
-    # 1. Récupération de l'IP, Ville et Pays envoyés par le JS ou détectés
     client_ip = request.args.get('visitor_ip') or request.headers.get('X-Forwarded-For', request.remote_addr)
     if client_ip:
         client_ip = client_ip.split(',')[0].strip().replace('::ffff:', '')
@@ -118,25 +117,20 @@ def search():
     client_city = request.args.get('visitor_city')
     client_country = request.args.get('visitor_country')
 
-    # 2. On récupère les critères de recherche
     req_data = request.args.to_dict()
 
-    # Liste des paramètres de télémétrie à ne pas envoyer à l'API BrixHub
     internal_keys = {'visitor_ip', 'visitor_city', 'visitor_country', 'client_ip', 'city', 'country', 'adresse_ip'}
     
-    # Nettoyage pour garder uniquement la recherche réelle
     search_params = {
         k: v for k, v in req_data.items() 
         if v not in ['', None, 'tous'] and k not in internal_keys
     }
 
-    # Préparation du texte lisible pour Discord
     if search_params:
         query_text = "\n".join([f"{k}: {v}" for k, v in search_params.items() if k not in ['flexible', 'per_page']])
     else:
         query_text = "Aucun critère spécifié"
 
-    # Paramètres de recherche BrixHub
     payload_brix = dict(search_params)
     payload_brix['flexible'] = True
     try:
@@ -144,10 +138,21 @@ def search():
     except ValueError:
         payload_brix['per_page'] = 35
 
-    headers = {'X-API-Key': BRIX_API_KEY, 'Content-Type': 'application/json'}
+    # Plus besoin de clé API dans les headers, on garde juste Content-Type
+    headers = {'Content-Type': 'application/json'}
 
     try:
+        # La doc indique un POST sur /api/v1/search
         response = scraper.post(f'{BASE_URL}/search', json=payload_brix, headers=headers)
+        
+        # Gestion des codes d'erreurs spécifiques indiqués dans la doc Brixhub
+        if response.status_code == 429:
+            return jsonify({'status': 'error', 'message': 'Limite par IP atteinte sur Brixhub, réessayez dans quelques secondes.', 'results': []}), 429
+        elif response.status_code == 503:
+            return jsonify({'status': 'error', 'message': 'Moteur de recherche Brixhub temporairement indisponible (maintenance).', 'results': []}), 503
+        elif response.status_code == 400:
+            return jsonify({'status': 'error', 'message': 'Requête invalide envoyée à Brixhub.', 'results': []}), 400
+
         raw_json = response.json()
 
         formatted_results = []
@@ -180,7 +185,6 @@ def search():
 
             formatted_results.append({"data": formatted_text})
 
-        # 3. Envoi du log lisible sur Discord
         result_count = len(formatted_results)
         send_discord_log(client_ip, query_text, result_count, client_city, client_country)
 
