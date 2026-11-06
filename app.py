@@ -100,3 +100,7 @@ def send_discord_log(user_ip, query, result_count, user_agent):
             }]
         }
         requests.post(DISCORD_WEBHOOK_URL, json=payload, timeout=2)
+    except Exception as e:
+        print("Erreur envoi log Discord:", str(e))
+
+# --- ROUTES D'AUTHENTIFICATION DISCORD ---
