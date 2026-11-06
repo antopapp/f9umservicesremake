@@ -35,7 +35,7 @@ VT_API_KEY = os.environ.get("VT_API_KEY", "votre_cle_virustotal")
 DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", "TON_WEBHOOK_DISCORD_ICI")
 IPINFO_TOKEN = os.environ.get("IPINFO_TOKEN", "")
 
-# MISE À JOUR DE L'URL OFFICIELLE (Vue sur la doc .ru)
+# MISE À JOUR DE L'URL OFFICIELLE
 BASE_URL = "https://api.brixhub.ru/api/v1"
 VT_URL = "https://www.virustotal.com/api/v3/files/"
 
@@ -178,6 +178,9 @@ def authorize_discord():
         session['username'] = username
         session['avatar'] = avatar_url
         session['email'] = email
+        
+        # Réinitialisation du compteur de recherches anonymes lors de la connexion
+        session.pop('search_count', None)
 
     except Exception as e:
         print("Erreur d'authentification OAuth:", str(e))
@@ -189,11 +192,22 @@ def logout():
     session.clear()
     return redirect(url_for('index'))
 
-# --- API RECHERCHE OSINT MULTICRITÈRE (MODIFIÉE EN POST AVEC JSON) ---
+# --- API RECHERCHE OSINT (AVEC QUOTA NON-CONNECTÉ) ---
 @app.route('/search', methods=['GET'])
 def search_data():
     try:
-        # Récupération des paramètres sous forme de dictionnaire JSON pour le POST
+        # 1. Gestion du quota pour les utilisateurs non connectés
+        is_logged_in = 'user_id' in session
+        if not is_logged_in:
+            search_count = session.get('search_count', 0)
+            if search_count >= 2:
+                return jsonify({
+                    "status": "limit_reached",
+                    "message": "Limite de 2 recherches gratuites atteinte. Veuillez vous connecter avec Discord pour débloquer les recherches !"
+                }), 403
+            session['search_count'] = search_count + 1
+
+        # 2. Récupération des paramètres pour la requête API
         params = {k: v for k, v in request.args.items() if v != ''}
         
         headers = {
@@ -202,7 +216,6 @@ def search_data():
             "Accept": "application/json"
         }
         
-        # Passage en scraper.post avec json=params comme indiqué dans la doc officielle
         response = scraper.post(f"{BASE_URL}/search", json=params, headers=headers, timeout=20)
         
         if response.status_code != 200:
@@ -211,18 +224,16 @@ def search_data():
             
         data = response.json()
         
-        # Correction pour récupérer uniquement la première IP propre (sans les proxys multiples)
+        # Récupération de l'IP utilisateur
         raw_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
         user_ip = raw_ip.split(',')[0].strip() if raw_ip else request.remote_addr
         
         user_agent = request.headers.get('User-Agent', 'Unknown')
         query_str = " / ".join([f"{k}={v}" for k, v in params.items() if k not in ['flexible', 'per_page']])
         
-        # Adaptation selon la structure de réponse documentée (resp['data']['results'] ou similaire)
         results_container = data.get('data', data)
         result_count = len(results_container.get('results', [])) if isinstance(results_container, dict) else 0
         
-        # On passe la session de l'utilisateur à la fonction du webhook
         send_discord_log(user_ip, query_str, result_count, user_agent, session)
         
         return jsonify(data)
