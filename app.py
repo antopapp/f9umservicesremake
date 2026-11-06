@@ -1,6 +1,7 @@
 import hashlib
 import os
 import sqlite3
+import traceback
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session
 from werkzeug.middleware.proxy_fix import ProxyFix
 import cloudscraper
@@ -11,7 +12,7 @@ from authlib.integrations.flask_client import OAuth
 load_dotenv()
 
 app = Flask(__name__)
-# Correction indispensable pour Railway (force HTTPS sur les redirections OAuth)
+# Correction pour Railway (force HTTPS sur les redirections OAuth)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
 app.secret_key = os.environ.get("SECRET_KEY", "une_cle_secrete_par_defaut")
@@ -178,21 +179,23 @@ def search_data():
         
         response = scraper.get(f"{BASE_URL}/search", params=params, headers=headers, timeout=20)
         
-        if response.status_code == 200:
-            data = response.json()
-            
-            user_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
-            user_agent = request.headers.get('User-Agent', 'Unknown')
-            query_str = " / ".join([f"{k}={v}" for k, v in params.items() if k not in ['flexible', 'per_page']])
-            result_count = len(data.get('results', [])) if isinstance(data, dict) else 0
-            
-            send_discord_log(user_ip, query_str, result_count, user_agent)
-            
-            return jsonify(data)
-        else:
+        if response.status_code != 200:
+            print(f"Erreur API externe [{response.status_code}]: {response.text}")
             return jsonify({"status": "error", "message": f"Erreur API externe: {response.status_code}"}), 500
             
+        data = response.json()
+        
+        user_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+        user_agent = request.headers.get('User-Agent', 'Unknown')
+        query_str = " / ".join([f"{k}={v}" for k, v in params.items() if k not in ['flexible', 'per_page']])
+        result_count = len(data.get('results', [])) if isinstance(data, dict) else 0
+        
+        send_discord_log(user_ip, query_str, result_count, user_agent)
+        
+        return jsonify(data)
+            
     except Exception as e:
+        traceback.print_exc()  # Affiche la trace complète de l'erreur dans les logs Railway
         return jsonify({"status": "error", "message": str(e)}), 500
 
 # --- API SCAN DE FICHIERS VIRUSTOTAL ---
@@ -231,6 +234,7 @@ def scan_file():
             return jsonify({"status": "error", "message": f"Erreur VirusTotal: {response.status_code}"}), 500
             
     except Exception as e:
+        traceback.print_exc()
         return jsonify({"status": "error", "message": str(e)}), 500
 
 if __name__ == '__main__':
