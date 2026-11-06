@@ -1449,7 +1449,7 @@
             document.getElementById('resultsArea').innerHTML = '';
         }
 
-        // Requêtes API (Multicritère) - Robuste pour la lecture de la structure JSON de BrixHub
+        // Requêtes API (Multicritère) - Formatage propre des résultats OSINT
         async function lancerRechercheMulticritere() {
             const area = document.getElementById('resultsArea');
             const payloadData = {
@@ -1527,10 +1527,28 @@
                     let htmlResults = '';
                     resultsArray.forEach((item, index) => {
                         const uniqueTextId = `result_content_${index}`;
-                        const contentText = typeof item === 'object' ? (item.data || JSON.stringify(item, null, 2)) : item;
+                        
+                        let formattedText = "";
+                        if (typeof item === 'object' && item !== null) {
+                            const nom = item.nom_famille || 'N/C';
+                            const prenom = item.prenom || 'N/C';
+                            const email = item.email || 'N/C';
+                            const pseudo = item.nom_utilisateur || 'N/C';
+                            const source = item._sources ? item._sources.join(', ') : 'Inconnue';
+                            const dateIns = item.date_inscription || 'N/C';
+
+                            formattedText = `👤 PROFIL : ${prenom} ${nom}
+📧 EMAIL : ${email}
+🏷️ PSEUDO : ${pseudo}
+📅 INSCRIPTION : ${dateIns}
+📂 SOURCE : ${source}`;
+                        } else {
+                            formattedText = item.data || JSON.stringify(item, null, 2);
+                        }
+
                         htmlResults += `
                             <div class="result-card">
-                                <div id="${uniqueTextId}" style="font-family: var(--font-mono); font-size: 0.85rem; white-space: pre-line; margin-bottom: 15px; color: #e2e8f0;">${contentText}</div>
+                                <div id="${uniqueTextId}" style="font-family: var(--font-mono); font-size: 0.85rem; white-space: pre-line; margin-bottom: 15px; color: #e2e8f0;">${formattedText}</div>
                                 <button class="btn-action" style="padding: 8px 16px; font-size: 12px;" onclick="copierResultat('${uniqueTextId}', this)">📋 Copier ce résultat</button>
                             </div>
                         `;
