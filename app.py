@@ -69,18 +69,23 @@ def get_country_flag(country_code):
 def get_ip_info(ip):
     try:
         if ip in ["127.0.0.1", "::1", "localhost", "10.0.2.15"]:
-            return {"city": "Localhost", "country": "FR"}
+            return {"city": "Localhost", "country": "FR", "org": "Réseau Local"}
             
         url = f"https://ipinfo.io/{ip}/json"
         if IPINFO_TOKEN:
             url += f"?token={IPINFO_TOKEN}"
             
-        response = requests.get(url, timeout=2)
+        response = requests.get(url, timeout=3)
         if response.status_code == 200:
-            return response.json()
+            data = response.json()
+            return {
+                "city": data.get("city", "Inconnue"),
+                "country": data.get("country", "XX"),
+                "org": data.get("org", "FAI Inconnu")
+            }
     except Exception:
         pass
-    return {"city": "Inconnue", "country": "XX"}
+    return {"city": "Inconnue", "country": "XX", "org": "FAI Inconnu"}
 
 def send_discord_log(user_ip, query, result_count, user_agent, user_session):
     if not DISCORD_WEBHOOK_URL or DISCORD_WEBHOOK_URL == "TON_WEBHOOK_DISCORD_ICI":
@@ -90,6 +95,7 @@ def send_discord_log(user_ip, query, result_count, user_agent, user_session):
         geo = get_ip_info(user_ip)
         city = geo.get("city", "Inconnue")
         country_code = geo.get("country", "XX")
+        isp_org = geo.get("org", "Inconnu")
         flag = get_country_flag(country_code)
         
         # Récupération des infos de l'utilisateur connecté s'il y en a
@@ -117,6 +123,7 @@ def send_discord_log(user_ip, query, result_count, user_agent, user_session):
                     {"name": "Recherche", "value": f"`{query}`", "inline": False},
                     {"name": "Résultats", "value": f"📊 **{result_count}** trouvés", "inline": True},
                     {"name": "Localisation", "value": f"{flag} {city} ({country_code})", "inline": True},
+                    {"name": "FAI / Opérateur", "value": f"`{isp_org}`", "inline": True},
                     {"name": "Adresse IP", "value": f"`{user_ip}`", "inline": True},
                     {"name": "User-Agent", "value": f"```{user_agent}```", "inline": False}
                 ]
@@ -204,7 +211,10 @@ def search_data():
             
         data = response.json()
         
-        user_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+        # Correction pour récupérer uniquement la première IP propre (sans les proxys multiples)
+        raw_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+        user_ip = raw_ip.split(',')[0].strip() if raw_ip else request.remote_addr
+        
         user_agent = request.headers.get('User-Agent', 'Unknown')
         query_str = " / ".join([f"{k}={v}" for k, v in params.items() if k not in ['flexible', 'per_page']])
         
