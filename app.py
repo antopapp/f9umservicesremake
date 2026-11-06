@@ -98,12 +98,10 @@ def send_discord_log(user_ip, query, result_count, user_agent, user_session):
         isp_org = geo.get("org", "Inconnu")
         flag = get_country_flag(country_code)
         
-        # Récupération des infos de l'utilisateur connecté s'il y en a
         user_id = user_session.get('user_id')
         username = user_session.get('username')
         avatar = user_session.get('avatar')
         
-        # Configuration de l'auteur du webhook selon la connexion
         if user_id:
             author_name = f"{username} (ID: {user_id})"
             author_icon = avatar if avatar else "https://cdn.discordapp.com/embed/avatars/0.png"
@@ -192,22 +190,23 @@ def logout():
     session.clear()
     return redirect(url_for('index'))
 
-# --- API RECHERCHE OSINT (AVEC QUOTA NON-CONNECTÉ) ---
+# --- API RECHERCHE OSINT (AVEC GESTION DU QUOTA & FLOUTAGE) ---
 @app.route('/search', methods=['GET'])
 def search_data():
     try:
-        # 1. Gestion du quota pour les utilisateurs non connectés
         is_logged_in = 'user_id' in session
+        remaining_searches = None
+
         if not is_logged_in:
             search_count = session.get('search_count', 0)
             if search_count >= 2:
                 return jsonify({
                     "status": "limit_reached",
-                    "message": "Limite de 2 recherches gratuites atteinte. Veuillez vous connecter avec Discord pour débloquer les recherches !"
+                    "message": "Limite de 2 recherches gratuites atteinte. Connectez-vous avec Discord pour continuer !"
                 }), 403
             session['search_count'] = search_count + 1
+            remaining_searches = 2 - session['search_count']
 
-        # 2. Récupération des paramètres pour la requête API
         params = {k: v for k, v in request.args.items() if v != ''}
         
         headers = {
@@ -219,15 +218,17 @@ def search_data():
         response = scraper.post(f"{BASE_URL}/search", json=params, headers=headers, timeout=20)
         
         if response.status_code != 200:
-            print(f"Erreur API externe [{response.status_code}]: {response.text}")
             return jsonify({"status": "error", "message": f"Erreur API externe: {response.status_code}"}), 500
             
         data = response.json()
         
-        # Récupération de l'IP utilisateur
+        # Injection des métadonnées de session dans le JSON de réponse
+        if isinstance(data, dict):
+            data['is_logged_in'] = is_logged_in
+            data['remaining_searches'] = remaining_searches
+
         raw_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
         user_ip = raw_ip.split(',')[0].strip() if raw_ip else request.remote_addr
-        
         user_agent = request.headers.get('User-Agent', 'Unknown')
         query_str = " / ".join([f"{k}={v}" for k, v in params.items() if k not in ['flexible', 'per_page']])
         
