@@ -99,4 +99,4 @@ def send_discord_log(user_ip, query, result_count, user_agent):
                 ]
             }]
         }
-        requests.post(DISCORD_WEBHOOK_URL, json=payload
+        requests.post(DISCORD_WEBHOOK_URL, json=payload, timeout=2)
