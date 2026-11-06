@@ -103,4 +103,133 @@ def send_discord_log(user_ip, query, result_count, user_agent):
     except Exception as e:
         print("Erreur envoi log Discord:", str(e))
 
-# --- ROUTES D'AUTHENTIFICATION DISCORD ---
+# --- ROUTES DE L'APPLICATION ET AUTHENTIFICATION ---
+
+@app.route('/')
+def index():
+    return render_template('index.html', user=session)
+
+@app.route('/login/discord')
+def login_discord():
+    redirect_uri = url_for('authorize_discord', _external=True)
+    return discord.authorize_redirect(redirect_uri)
+
+@app.route('/login/authorized')
+def authorize_discord():
+    try:
+        token = discord.authorize_access_token()
+        resp = discord.get('users/@me', token=token)
+        user_info = resp.json()
+
+        discord_id = str(user_info.get('id'))
+        username = user_info.get('username')
+        discriminator = user_info.get('discriminator')
+        if discriminator and discriminator != '0':
+            username = f"{username}#{discriminator}"
+            
+        email = user_info.get('email')
+        avatar_id = user_info.get('avatar')
+        avatar_url = f"https://cdn.discordapp.com/avatars/{discord_id}/{avatar_id}.png" if avatar_id else "https://cdn.discordapp.com/embed/avatars/0.png"
+
+        # Enregistrement ou mise à jour en base de données SQLite
+        conn = sqlite3.connect('database.db')
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO users (discord_id, username, email, avatar)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT(discord_id) DO UPDATE SET
+                username = excluded.username,
+                email = excluded.email,
+                avatar = excluded.avatar
+        ''', (discord_id, username, email, avatar_url))
+        conn.commit()
+        conn.close()
+
+        # Stockage dans la session Flask
+        session['user_id'] = discord_id
+        session['username'] = username
+        session['avatar'] = avatar_url
+        session['email'] = email
+
+    except Exception as e:
+        print("Erreur d'authentification OAuth:", str(e))
+
+    return redirect(url_for('index'))
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('index'))
+
+# --- API RECHERCHE OSINT MULTICRITÈRE ---
+@app.route('/search', methods=['GET'])
+def search_data():
+    try:
+        params = {k: v for k, v in request.args.items() if v != ''}
+        
+        headers = {
+            "Authorization": f"Bearer {BRIX_API_KEY}",
+            "Accept": "application/json"
+        }
+        
+        response = scraper.get(f"{BASE_URL}/search", params=params, headers=headers, timeout=20)
+        
+        if response.status_code == 200:
+            data = response.json()
+            
+            # Récupération des infos pour les logs Discord
+            user_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+            user_agent = request.headers.get('User-Agent', 'Unknown')
+            query_str = " / ".join([f"{k}={v}" for k, v in params.items() if k not in ['flexible', 'per_page']])
+            result_count = len(data.get('results', [])) if isinstance(data, dict) else 0
+            
+            send_discord_log(user_ip, query_str, result_count, user_agent)
+            
+            return jsonify(data)
+        else:
+            return jsonify({"status": "error", "message": f"Erreur API externe: {response.status_code}"}), 500
+            
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+# --- API SCAN DE FICHIERS VIRUSTOTAL ---
+@app.route('/scan-file', methods=['POST'])
+def scan_file():
+    try:
+        body = request.get_json()
+        file_hash = body.get('hash')
+        
+        if not file_hash:
+            return jsonify({"status": "error", "message": "Empreinte SHA-256 manquante."}), 400
+            
+        headers = {
+            "x-apikey": VT_API_KEY,
+            "Accept": "application/json"
+        }
+        
+        response = requests.get(f"{VT_URL}{file_hash}", headers=headers, timeout=12)
+        
+        if response.status_code == 200:
+            vt_data = response.json()
+            stats = vt_data.get('data', {}).get('attributes', {}).get('last_analysis_stats', {})
+            return jsonify({
+                "status": "success",
+                "malicious": stats.get('malicious', 0),
+                "suspicious": stats.get('suspicious', 0),
+                "harmless": stats.get('harmless', 0),
+                "undetected": stats.get('undetected', 0)
+            })
+        elif response.status_code == 404:
+            return jsonify({
+                "status": "not_found",
+                "message": "Aucun rapport VirusTotal trouvé pour ce fichier."
+            })
+        else:
+            return jsonify({"status": "error", "message": f"Erreur VirusTotal: {response.status_code}"}), 500
+            
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+if __name__ == '__main__':
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
