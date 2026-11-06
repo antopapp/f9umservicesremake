@@ -924,86 +924,81 @@
             <div id="module-multicritere" class="module-panel active">
                 <div class="search-builder">
                     
+                    <!-- ACCORDÉON 1 : IDENTITÉ -->
                     <div class="accordion-item active">
                         <button class="accordion-header" onclick="toggleAccordion(this)">
-                            <span class="accordion-title-left">👤 PROFIL</span>
+                            <span class="accordion-title-left">👤 IDENTITÉ</span>
                             <span class="accordion-arrow">▼</span>
                         </button>
-                        <div class="accordion-content" style="max-height: 420px;">
+                        <div class="accordion-content" style="max-height: 600px;">
                             <div class="fields-grid">
                                 <div class="field-group">
                                     <label for="nom_famille">Nom de famille</label>
-                                    <input type="text" id="nom_famille" placeholder="DUPONT" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
+                                    <input type="text" id="nom_famille" placeholder="BONNET" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
                                 </div>
                                 <div class="field-group">
                                     <label for="prenom">Prénom</label>
-                                    <input type="text" id="prenom" placeholder="JEAN" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
+                                    <input type="text" id="prenom" placeholder="QUENTIN" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
                                 </div>
                                 <div class="field-group">
                                     <label for="nom_naissance">Nom de naissance</label>
                                     <input type="text" id="nom_naissance" placeholder="MARTIN" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
                                 </div>
                                 <div class="field-group">
-                                    <label for="nom_affiche">Nom affiché / Pseudo</label>
-                                    <input type="text" id="nom_affiche" placeholder="JEAN DUPONT" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
+                                    <label for="nom_affichage">Nom d'affichage</label>
+                                    <input type="text" id="nom_affichage" placeholder="QUENTIN B." onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
+                                </div>
+                                <div class="field-group">
+                                    <label for="nom_utilisateur">Nom d'utilisateur / Pseudo</label>
+                                    <input type="text" id="nom_utilisateur" placeholder="F9UM" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
                                 </div>
                                 <div class="field-group">
                                     <label for="genre">Genre</label>
                                     <input type="text" id="genre" placeholder="M / F" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
                                 </div>
                                 <div class="field-group">
-                                    <label for="nom_utilisateur">Nom d'utilisateur</label>
-                                    <input type="text" id="nom_utilisateur" placeholder="F9UM" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
+                                    <label for="civilite">Civilité</label>
+                                    <input type="text" id="civilite" placeholder="M. / Mme" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="accordion-item">
-                        <button class="accordion-header" onclick="toggleAccordion(this)">
-                            <span class="accordion-title-left">📅 NAISSANCE</span>
-                            <span class="accordion-arrow">▼</span>
-                        </button>
-                        <div class="accordion-content">
-                            <div class="fields-grid">
                                 <div class="field-group">
-                                    <label for="jour_naissance">Jour</label>
+                                    <label for="jour_naissance">Jour de naissance</label>
                                     <input type="text" id="jour_naissance" placeholder="20" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
                                 </div>
                                 <div class="field-group">
-                                    <label for="mois_naissance">Mois</label>
+                                    <label for="mois_naissance">Mois de naissance</label>
                                     <input type="text" id="mois_naissance" placeholder="04" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
                                 </div>
                                 <div class="field-group">
-                                    <label for="annee_naissance">Année</label>
+                                    <label for="annee_naissance">Année de naissance</label>
                                     <input type="text" id="annee_naissance" placeholder="1995" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
                                 </div>
                                 <div class="field-group">
                                     <label for="date_naissance">Date exacte (AAAA-MM-JJ)</label>
-                                    <input type="text" id="date_naissance" placeholder="1995-06-15" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
-                                </div>
-                                <div class="field-group">
-                                    <label for="ville_naissance">Ville de naissance</label>
-                                    <input type="text" id="ville_naissance" placeholder="PARIS" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
+                                    <input type="text" id="date_naissance" placeholder="1995-04-20" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
                                 </div>
                             </div>
                         </div>
                     </div>
 
+                    <!-- ACCORDÉON 2 : CONTACT -->
                     <div class="accordion-item">
                         <button class="accordion-header" onclick="toggleAccordion(this)">
-                            <span class="accordion-title-left">✉️ CONTACT</span>
+                            <span class="accordion-title-left">✉️ CONTACT & RENSEIGNEMENT</span>
                             <span class="accordion-arrow">▼</span>
                         </button>
                         <div class="accordion-content">
                             <div class="fields-grid">
                                 <div class="field-group">
                                     <label for="email">Adresse E-mail</label>
-                                    <input type="text" id="email" placeholder="NOM@GMAIL.COM" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
+                                    <input type="text" id="email" placeholder="pietrorobertod@yahoo.com" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
                                 </div>
                                 <div class="field-group">
-                                    <label for="telephone">Téléphone</label>
-                                    <input type="text" id="telephone" placeholder="0612345678" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
+                                    <label for="telephone">Téléphone Fixe</label>
+                                    <input type="text" id="telephone" placeholder="0123456789" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
+                                </div>
+                                <div class="field-group">
+                                    <label for="mobile">Téléphone Mobile</label>
+                                    <input type="text" id="mobile" placeholder="0612345678" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
                                 </div>
                                 <div class="field-group">
                                     <label for="adresse_ip">Adresse IP</label>
@@ -1017,6 +1012,7 @@
                         </div>
                     </div>
 
+                    <!-- ACCORDÉON 3 : LOCALISATION -->
                     <div class="accordion-item">
                         <button class="accordion-header" onclick="toggleAccordion(this)">
                             <span class="accordion-title-left">📍 LOCALISATION</span>
@@ -1029,12 +1025,132 @@
                                     <input type="text" id="adresse" placeholder="12 Rue de la Paix" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
                                 </div>
                                 <div class="field-group">
+                                    <label for="complement_adresse">Complément Adresse</label>
+                                    <input type="text" id="complement_adresse" placeholder="Bâtiment B, Apt 4" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
+                                </div>
+                                <div class="field-group">
                                     <label for="code_postal">Code Postal</label>
                                     <input type="text" id="code_postal" placeholder="75001" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
                                 </div>
                                 <div class="field-group">
                                     <label for="ville">Ville</label>
                                     <input type="text" id="ville" placeholder="PARIS" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
+                                </div>
+                                <div class="field-group">
+                                    <label for="departement">Département</label>
+                                    <input type="text" id="departement" placeholder="75" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
+                                </div>
+                                <div class="field-group">
+                                    <label for="region">Région</label>
+                                    <input type="text" id="region" placeholder="Île-de-France" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
+                                </div>
+                                <div class="field-group">
+                                    <label for="pays">Pays</label>
+                                    <input type="text" id="pays" placeholder="FRANCE" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
+                                </div>
+                                <div class="field-group">
+                                    <label for="ville_naissance">Ville de Naissance</label>
+                                    <input type="text" id="ville_naissance" placeholder="LYON" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
+                                </div>
+                                <div class="field-group">
+                                    <label for="lieu_naissance">Lieu de Naissance</label>
+                                    <input type="text" id="lieu_naissance" placeholder="Hôpital Central" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ACCORDÉON 4 : PROFESSIONNEL & VÉHICULES -->
+                    <div class="accordion-item">
+                        <button class="accordion-header" onclick="toggleAccordion(this)">
+                            <span class="accordion-title-left">🏢 PROFESSIONNEL & VÉHICULES</span>
+                            <span class="accordion-arrow">▼</span>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="fields-grid">
+                                <div class="field-group">
+                                    <label for="societe">Société / Entreprise</label>
+                                    <input type="text" id="societe" placeholder="ACME Corp" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
+                                </div>
+                                <div class="field-group">
+                                    <label for="profession">Profession</label>
+                                    <input type="text" id="profession" placeholder="Ingénieur" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
+                                </div>
+                                <div class="field-group">
+                                    <label for="fonction">Fonction</label>
+                                    <input type="text" id="fonction" placeholder="Directeur IT" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
+                                </div>
+                                <div class="field-group">
+                                    <label for="siret">SIRET</label>
+                                    <input type="text" id="siret" placeholder="12345678900012" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
+                                </div>
+                                <div class="field-group">
+                                    <label for="siren">SIREN</label>
+                                    <input type="text" id="siren" placeholder="123456789" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
+                                </div>
+                                <div class="field-group">
+                                    <label for="marque">Marque Véhicule</label>
+                                    <input type="text" id="marque" placeholder="Peugeot" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
+                                </div>
+                                <div class="field-group">
+                                    <label for="modele">Modèle Véhicule</label>
+                                    <input type="text" id="modele" placeholder="208" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
+                                </div>
+                                <div class="field-group">
+                                    <label for="immatriculation">Plaque d'immatriculation</label>
+                                    <input type="text" id="immatriculation" placeholder="AA-123-BB" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
+                                </div>
+                                <div class="field-group">
+                                    <label for="vin_plaque">VIN / Plaque</label>
+                                    <input type="text" id="vin_plaque" placeholder="VF3..." onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
+                                </div>
+                                <div class="field-group">
+                                    <label for="numero_serie">Numéro de série</label>
+                                    <input type="text" id="numero_serie" placeholder="SN123456" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ACCORDÉON 5 : BANCAIRE & GAMING -->
+                    <div class="accordion-item">
+                        <button class="accordion-header" onclick="toggleAccordion(this)">
+                            <span class="accordion-title-left">💳 BANCAIRE & GAMING</span>
+                            <span class="accordion-arrow">▼</span>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="fields-grid">
+                                <div class="field-group">
+                                    <label for="iban">IBAN</label>
+                                    <input type="text" id="iban" placeholder="FR76 1234 5678..." onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
+                                </div>
+                                <div class="field-group">
+                                    <label for="bic">BIC / SWIFT</label>
+                                    <input type="text" id="bic" placeholder="BNPAFRPP" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
+                                </div>
+                                <div class="field-group">
+                                    <label for="steam_id">Steam ID</label>
+                                    <input type="text" id="steam_id" placeholder="76561198..." onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
+                                </div>
+                                <div class="field-group">
+                                    <label for="fivem_license">FiveM Licence</label>
+                                    <input type="text" id="fivem_license" placeholder="license:abc123..." onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
+                                </div>
+                                <div class="field-group">
+                                    <label for="fivem_license2">FiveM Licence 2</label>
+                                    <input type="text" id="fivem_license2" placeholder="license2:xyz789..." onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
+                                </div>
+                                <div class="field-group">
+                                    <label for="fivem_id">FiveM ID</label>
+                                    <input type="text" id="fivem_id" placeholder="fivem:12345" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
+                                </div>
+                                <div class="field-group">
+                                    <label for="xbox_live_id">Xbox Live ID</label>
+                                    <input type="text" id="xbox_live_id" placeholder="XBL_12345" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
+                                </div>
+                                <div class="field-group">
+                                    <label for="live_id">Live ID</label>
+                                    <input type="text" id="live_id" placeholder="LIVE_9876" onkeypress="if(event.key === 'Enter') lancerRechercheMulticritere()">
                                 </div>
                             </div>
                         </div>
@@ -1449,33 +1565,33 @@
             document.getElementById('resultsArea').innerHTML = '';
         }
 
-        // Requêtes API (Multicritère) - Formatage propre des résultats OSINT
+        // Requêtes API (Multicritère BrixHub) - Extraction exhaustive de l'ensemble des clés
         async function lancerRechercheMulticritere() {
             const area = document.getElementById('resultsArea');
+            
+            // Récupération de l'ensemble des champs documentés BrixHub
+            const allFieldIds = [
+                'nom_famille', 'prenom', 'nom_naissance', 'nom_affichage', 'nom_utilisateur',
+                'genre', 'civilite', 'date_naissance', 'annee_naissance', 'jour_naissance', 'mois_naissance',
+                'email', 'telephone', 'mobile', 'adresse_ip', 'discord_id',
+                'adresse', 'complement_adresse', 'ville', 'code_postal', 'departement', 'region', 'pays', 'ville_naissance', 'lieu_naissance',
+                'societe', 'profession', 'fonction', 'siret', 'siren', 'marque', 'modele', 'vin_plaque', 'immatriculation', 'numero_serie',
+                'iban', 'bic', 'steam_id', 'fivem_license', 'fivem_license2', 'fivem_id', 'xbox_live_id', 'live_id'
+            ];
+
             const payloadData = {
-                nom_famille: document.getElementById('nom_famille').value.trim(),
-                prenom: document.getElementById('prenom').value.trim(),
-                nom_naissance: document.getElementById('nom_naissance').value.trim(),
-                nom_affiche: document.getElementById('nom_affiche').value.trim(),
-                genre: document.getElementById('genre').value.trim(),
-                nom_utilisateur: document.getElementById('nom_utilisateur').value.trim(),
-                jour_naissance: document.getElementById('jour_naissance').value.trim(),
-                mois_naissance: document.getElementById('mois_naissance').value.trim(),
-                annee_naissance: document.getElementById('annee_naissance').value.trim(),
-                date_naissance: document.getElementById('date_naissance').value.trim(),
-                ville_naissance: document.getElementById('ville_naissance').value.trim(),
-                email: document.getElementById('email').value.trim(),
-                telephone: document.getElementById('telephone').value.trim(),
-                adresse_ip: document.getElementById('adresse_ip').value.trim(),
-                discord_id: document.getElementById('discord_id').value.trim(),
-                adresse: document.getElementById('adresse').value.trim(),
-                code_postal: document.getElementById('code_postal').value.trim(),
-                ville: document.getElementById('ville').value.trim(),
                 flexible: true,
                 per_page: 20
             };
 
-            const activeFilters = Object.fromEntries(Object.entries(payloadData).filter(([_, v]) => v !== "" && v !== true));
+            allFieldIds.forEach(id => {
+                const elem = document.getElementById(id);
+                if (elem && elem.value.trim() !== '') {
+                    payloadData[id] = elem.value.trim();
+                }
+            });
+
+            const activeFilters = Object.fromEntries(Object.entries(payloadData).filter(([k, v]) => k !== 'flexible' && k !== 'per_page' && v !== ''));
 
             if (Object.keys(activeFilters).length === 0) {
                 area.innerHTML = `
@@ -1519,8 +1635,6 @@
                 if (!response.ok) throw new Error(`Erreur serveur : ${response.status}`);
 
                 const data = await response.json();
-
-                // Extraction robuste des résultats (gère data.results ou data.data.results)
                 const resultsArray = data.results || (data.data && data.data.results) || [];
 
                 if (resultsArray.length > 0) {
@@ -1530,25 +1644,22 @@
                         
                         let formattedText = "";
                         if (typeof item === 'object' && item !== null) {
-                            const nom = item.nom_famille || 'N/C';
-                            const prenom = item.prenom || 'N/C';
-                            const email = item.email || 'N/C';
-                            const pseudo = item.nom_utilisateur || 'N/C';
-                            const source = item._sources ? item._sources.join(', ') : 'Inconnue';
-                            const dateIns = item.date_inscription || 'N/C';
-
-                            formattedText = `👤 PROFIL : ${prenom} ${nom}
-📧 EMAIL : ${email}
-🏷️ PSEUDO : ${pseudo}
-📅 INSCRIPTION : ${dateIns}
-📂 SOURCE : ${source}`;
+                            let lignes = [];
+                            for (const [key, value] of Object.entries(item)) {
+                                if (value !== null && value !== "" && value !== undefined) {
+                                    let cleanKey = key.replace(/^_/, '').replace(/_/g, ' ').toUpperCase();
+                                    let valStr = Array.isArray(value) ? value.join(', ') : value;
+                                    lignes.push(`🔹 ${cleanKey} : ${valStr}`);
+                                }
+                            }
+                            formattedText = lignes.join('\n');
                         } else {
                             formattedText = item.data || JSON.stringify(item, null, 2);
                         }
 
                         htmlResults += `
                             <div class="result-card">
-                                <div id="${uniqueTextId}" style="font-family: var(--font-mono); font-size: 0.85rem; white-space: pre-line; margin-bottom: 15px; color: #e2e8f0;">${formattedText}</div>
+                                <div id="${uniqueTextId}" style="font-family: var(--font-mono); font-size: 0.85rem; white-space: pre-line; margin-bottom: 15px; color: #e2e8f0; line-height: 1.8;">${formattedText}</div>
                                 <button class="btn-action" style="padding: 8px 16px; font-size: 12px;" onclick="copierResultat('${uniqueTextId}', this)">📋 Copier ce résultat</button>
                             </div>
                         `;
