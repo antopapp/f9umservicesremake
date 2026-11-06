@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -598,7 +598,7 @@
         }
 
         /* ==========================================================================
-           6. RESULTS AREA & SPINNERS & DROPDOWN SEARCH HISTORY
+           6. DESIGN AMÉLIORÉ DES RÉSULTATS OSINT (STYLES MODERNES)
            ========================================================================== */
         .history-dropdown-container {
             position: relative;
@@ -681,7 +681,7 @@
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 18px;
+            gap: 20px;
             margin-bottom: 40px;
         }
 
@@ -689,7 +689,7 @@
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: 18px;
-            padding: 26px;
+            padding: 28px;
             backdrop-filter: blur(20px);
             box-shadow: var(--shadow-subtle);
             animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -702,14 +702,47 @@
             position: absolute;
             top: 0;
             left: 0;
-            width: 4px;
+            width: 5px;
             height: 100%;
-            background: var(--primary);
+            background: linear-gradient(to bottom, var(--primary), var(--neon-purple));
         }
 
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(16px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Grille interne pour structurer les données d'un résultat */
+        .osint-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin-bottom: 22px;
+            font-family: var(--font-mono);
+        }
+
+        .osint-field-box {
+            background: rgba(2, 6, 23, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 12px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .osint-label {
+            font-size: 10px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .osint-value {
+            font-size: 13px;
+            color: #ffffff;
+            font-weight: 600;
+            word-break: break-all;
         }
 
         .spinner-container {
@@ -1565,11 +1598,10 @@
             document.getElementById('resultsArea').innerHTML = '';
         }
 
-        // Requêtes API (Multicritère BrixHub) - Extraction exhaustive de l'ensemble des clés
+        // Requêtes API (Multicritère) - Repasse par ton backend Flask pour déclencher le Webhook Discord
         async function lancerRechercheMulticritere() {
             const area = document.getElementById('resultsArea');
             
-            // Récupération de l'ensemble des champs documentés BrixHub
             const allFieldIds = [
                 'nom_famille', 'prenom', 'nom_naissance', 'nom_affichage', 'nom_utilisateur',
                 'genre', 'civilite', 'date_naissance', 'annee_naissance', 'jour_naissance', 'mois_naissance',
@@ -1611,7 +1643,7 @@
                 <div class="spinner-container">
                     <div class="spinner"></div>
                     <p style="font-size: 0.9rem; color: var(--text-muted); font-family: var(--font-mono);">
-                        Interrogation de l'API en cours...
+                        Interrogation de l'API et journalisation sécurisée en cours...
                     </p>
                 </div>
             `;
@@ -1624,6 +1656,7 @@
 
                 const queryParams = new URLSearchParams(Object.entries(payloadData).filter(([_, v]) => v !== "" && v !== false));
 
+                // On interroge ton propre backend (/search) pour que Flask exécute le webhook Discord avec l'IP réelle
                 const response = await fetch(`${API_BASE_URL}/search?${queryParams.toString()}`, {
                     method: 'GET',
                     signal: controller.signal,
@@ -1642,25 +1675,37 @@
                     resultsArray.forEach((item, index) => {
                         const uniqueTextId = `result_content_${index}`;
                         
-                        let formattedText = "";
+                        let gridItemsHtml = "";
+                        let rawTextForCopy = "";
+
                         if (typeof item === 'object' && item !== null) {
-                            let lignes = [];
                             for (const [key, value] of Object.entries(item)) {
                                 if (value !== null && value !== "" && value !== undefined) {
                                     let cleanKey = key.replace(/^_/, '').replace(/_/g, ' ').toUpperCase();
                                     let valStr = Array.isArray(value) ? value.join(', ') : value;
-                                    lignes.push(`🔹 ${cleanKey} : ${valStr}`);
+                                    
+                                    gridItemsHtml += `
+                                        <div class="osint-field-box">
+                                            <span class="osint-label">${cleanKey}</span>
+                                            <span class="osint-value">${valStr}</span>
+                                        </div>
+                                    `;
+                                    rawTextForCopy += `${cleanKey} : ${valStr}\n`;
                                 }
                             }
-                            formattedText = lignes.join('\n');
                         } else {
-                            formattedText = item.data || JSON.stringify(item, null, 2);
+                            rawTextForCopy = item.data || JSON.stringify(item, null, 2);
+                            gridItemsHtml = `<div class="osint-field-box"><span class="osint-label">DONNÉE</span><span class="osint-value">${rawTextForCopy}</span></div>`;
                         }
 
+                        // Élément caché pour la copie propre dans le presse-papiers
                         htmlResults += `
                             <div class="result-card">
-                                <div id="${uniqueTextId}" style="font-family: var(--font-mono); font-size: 0.85rem; white-space: pre-line; margin-bottom: 15px; color: #e2e8f0; line-height: 1.8;">${formattedText}</div>
-                                <button class="btn-action" style="padding: 8px 16px; font-size: 12px;" onclick="copierResultat('${uniqueTextId}', this)">📋 Copier ce résultat</button>
+                                <div id="${uniqueTextId}" style="display:none;">${rawTextForCopy.trim()}</div>
+                                <div class="osint-grid">
+                                    ${gridItemsHtml}
+                                </div>
+                                <button class="btn-action" style="padding: 9px 18px; font-size: 12px;" onclick="copierResultat('${uniqueTextId}', this)">📋 Copier ce résultat</button>
                             </div>
                         `;
                     });
