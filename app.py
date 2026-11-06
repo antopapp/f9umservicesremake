@@ -35,7 +35,8 @@ VT_API_KEY = os.environ.get("VT_API_KEY", "votre_cle_virustotal")
 DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", "TON_WEBHOOK_DISCORD_ICI")
 IPINFO_TOKEN = os.environ.get("IPINFO_TOKEN", "")
 
-BASE_URL = "https://api.brixhub.to/api/v1"
+# MISE À JOUR DE L'URL OFFICIELLE (Vue sur la doc .ru)
+BASE_URL = "https://api.brixhub.ru/api/v1"
 VT_URL = "https://www.virustotal.com/api/v3/files/"
 
 # Création d'un scraper capable de contourner Cloudflare
@@ -136,7 +137,6 @@ def authorize_discord():
         avatar_id = user_info.get('avatar')
         avatar_url = f"https://cdn.discordapp.com/avatars/{discord_id}/{avatar_id}.png" if avatar_id else "https://cdn.discordapp.com/embed/avatars/0.png"
 
-        # Enregistrement ou mise à jour en base de données SQLite
         conn = sqlite3.connect('database.db')
         cursor = conn.cursor()
         cursor.execute('''
@@ -150,7 +150,6 @@ def authorize_discord():
         conn.commit()
         conn.close()
 
-        # Stockage dans la session Flask
         session['user_id'] = discord_id
         session['username'] = username
         session['avatar'] = avatar_url
@@ -166,18 +165,21 @@ def logout():
     session.clear()
     return redirect(url_for('index'))
 
-# --- API RECHERCHE OSINT MULTICRITÈRE ---
+# --- API RECHERCHE OSINT MULTICRITÈRE (MODIFIÉE EN POST AVEC JSON) ---
 @app.route('/search', methods=['GET'])
 def search_data():
     try:
+        # Récupération des paramètres sous forme de dictionnaire JSON pour le POST
         params = {k: v for k, v in request.args.items() if v != ''}
         
         headers = {
             "Authorization": f"Bearer {BRIX_API_KEY}",
+            "Content-Type": "application/json",
             "Accept": "application/json"
         }
         
-        response = scraper.get(f"{BASE_URL}/search", params=params, headers=headers, timeout=20)
+        # Passage en scraper.post avec json=params comme indiqué dans la doc officielle
+        response = scraper.post(f"{BASE_URL}/search", json=params, headers=headers, timeout=20)
         
         if response.status_code != 200:
             print(f"Erreur API externe [{response.status_code}]: {response.text}")
@@ -188,14 +190,17 @@ def search_data():
         user_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
         user_agent = request.headers.get('User-Agent', 'Unknown')
         query_str = " / ".join([f"{k}={v}" for k, v in params.items() if k not in ['flexible', 'per_page']])
-        result_count = len(data.get('results', [])) if isinstance(data, dict) else 0
+        
+        # Adaptation selon la structure de réponse documentée (resp['data']['results'] ou similaire)
+        results_container = data.get('data', data)
+        result_count = len(results_container.get('results', [])) if isinstance(results_container, dict) else 0
         
         send_discord_log(user_ip, query_str, result_count, user_agent)
         
         return jsonify(data)
             
     except Exception as e:
-        traceback.print_exc()  # Affiche la trace complète de l'erreur dans les logs Railway
+        traceback.print_exc()
         return jsonify({"status": "error", "message": str(e)}), 500
 
 # --- API SCAN DE FICHIERS VIRUSTOTAL ---
