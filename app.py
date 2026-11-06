@@ -2,6 +2,7 @@ import hashlib
 import os
 import sqlite3
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session
+from werkzeug.middleware.proxy_fix import ProxyFix
 import cloudscraper
 import requests
 from dotenv import load_dotenv
@@ -10,6 +11,9 @@ from authlib.integrations.flask_client import OAuth
 load_dotenv()
 
 app = Flask(__name__)
+# Correction indispensable pour Railway (force HTTPS sur les redirections OAuth)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
+
 app.secret_key = os.environ.get("SECRET_KEY", "une_cle_secrete_par_defaut")
 
 # --- CONFIGURATION OAUTH DISCORD ---
@@ -177,7 +181,6 @@ def search_data():
         if response.status_code == 200:
             data = response.json()
             
-            # Récupération des infos pour les logs Discord
             user_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
             user_agent = request.headers.get('User-Agent', 'Unknown')
             query_str = " / ".join([f"{k}={v}" for k, v in params.items() if k not in ['flexible', 'per_page']])
