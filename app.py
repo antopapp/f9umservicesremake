@@ -82,7 +82,7 @@ def get_ip_info(ip):
         pass
     return {"city": "Inconnue", "country": "XX"}
 
-def send_discord_log(user_ip, query, result_count, user_agent):
+def send_discord_log(user_ip, query, result_count, user_agent, user_session):
     if not DISCORD_WEBHOOK_URL or DISCORD_WEBHOOK_URL == "TON_WEBHOOK_DISCORD_ICI":
         return
     
@@ -92,10 +92,27 @@ def send_discord_log(user_ip, query, result_count, user_agent):
         country_code = geo.get("country", "XX")
         flag = get_country_flag(country_code)
         
+        # Récupération des infos de l'utilisateur connecté s'il y en a
+        user_id = user_session.get('user_id')
+        username = user_session.get('username')
+        avatar = user_session.get('avatar')
+        
+        # Configuration de l'auteur du webhook selon la connexion
+        if user_id:
+            author_name = f"{username} (ID: {user_id})"
+            author_icon = avatar if avatar else "https://cdn.discordapp.com/embed/avatars/0.png"
+        else:
+            author_name = "Visiteur Non Connecté"
+            author_icon = "https://cdn.discordapp.com/embed/avatars/0.png"
+
         payload = {
             "embeds": [{
                 "title": "🔍 Nouvelle recherche effectuée",
                 "color": 5793266, 
+                "author": {
+                    "name": author_name,
+                    "icon_url": author_icon
+                },
                 "fields": [
                     {"name": "Recherche", "value": f"`{query}`", "inline": False},
                     {"name": "Résultats", "value": f"📊 **{result_count}** trouvés", "inline": True},
@@ -195,7 +212,8 @@ def search_data():
         results_container = data.get('data', data)
         result_count = len(results_container.get('results', [])) if isinstance(results_container, dict) else 0
         
-        send_discord_log(user_ip, query_str, result_count, user_agent)
+        # On passe la session de l'utilisateur à la fonction du webhook
+        send_discord_log(user_ip, query_str, result_count, user_agent, session)
         
         return jsonify(data)
             
